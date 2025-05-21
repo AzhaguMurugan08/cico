@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Student Check Out{% endblock %}
+
+{% block content %}
+<head>
+  <meta charset="UTF-8">
+  <title>Student Check-Out</title>
+  <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212; /* Dark background */
+      margin: 0;
+      padding: 20px;
+      color: #e0e0e0; /* Light text */
+    }
+
+    h2 {
+      font-weight: 600;
+      color: #ffffff; /* White text */
+      text-align: center;
+    }
+
+    .checkout-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 30px;
+    }
+
+    #scanner-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 280px;
+      margin-bottom: 25px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000; /* Black background for scanner */
+    }
+
+    #scanner-container {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .scanner-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80%;
+      height: 40%;
+      transform: translate(-50%, -50%);
+      border: 3px solid rgba(255, 255, 255, 0.8); /* White border */
+      border-radius: 8px;
+      z-index: 2;
+    }
+
+    .scanner-prompt {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: #ffc107; /* Yellow background */
+      color: #000; /* Black text */
+      text-align: center;
+      font-weight: 600;
+      padding: 10px;
+      font-size: 14px;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+
+    form {
+      background-color: #1f1f1f; /* Dark form background */
+      padding: 25px 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); /* Darker shadow */
+      width: 100%;
+      max-width: 480px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #e0e0e0; /* Light text */
+      font-weight: 500;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 5px;
+      border: 1px solid #444; /* Dark border */
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: #2c2c2c; /* Dark input background */
+      color: #ffffff; /* White text */
+    }
+
+    input[type="text"]::placeholder, textarea::placeholder {
+      color: #888888; /* Light gray placeholder text */
+    }
+
+    textarea {
+      resize: vertical;
+      height: 80px;
+    }
+
+    button[type="submit"] {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #dc3545; 
+      color: #ffffff; 
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+ 
+  </style>
+</head>
+
+<body>
+
+  <div class="checkout-container">
+    <!-- Barcode Scanner -->
+    <div id="scanner-wrapper">
+      <div class="scanner-frame"></div>
+      <div class="scanner-prompt">📷 Point your camera at a barcode</div>
+      <div id="scanner-container"></div>
+    </div>
+
+    <!-- Check-Out Form -->
+    <form method="POST">
+      <label>Student Name:</label>
+      <input type="text" name="name" id="name" placeholder="Enter student name" required>
+
+      <label>Roll Number:</label>
+      <input type="text" name="roll_number" id="roll_number" placeholder="Enter roll number" required>
+
+      <label>Department:</label>
+      <input type="text" name="department" id="department" placeholder="Enter department" required>
+
+      <label>year</label>
+      <input type="text" name="year" id="year" placeholder="Enter year" required>
+
+
+      <button type="submit">Check Out</button>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      Quagga.init({
+        inputStream: {
+          type: "LiveStream",
+          target: document.querySelector("#scanner-container"),
+          constraints: {
+            facingMode: "environment"
+          },
+        },
+        decoder: {
+          readers: ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader"]
+        }
+      }, function (err) {
+        if (err) {
+          console.error("Quagga init error:", err);
+          return;
+        }
+        Quagga.start();
+      });
+
+      Quagga.onDetected(function (result) {
+        const code = result.codeResult.code;
+        console.log("Scanned barcode:", code);
+        document.getElementById("roll_number").value = code;
+        Quagga.stop();
+
+        // Fetch name and department from backend using roll number
+        fetch("/get_student_details", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ roll_number: code })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.name && data.department) {
+            document.getElementById("name").value = data.name;
+            document.getElementById("department").value = data.department;
+            document.getElementById("year").value = data.year;
+          } else {
+            alert("No student found for Roll Number: " + code);
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching student details:", error);
+        });
+      });
+    });
+  </script>
+</body>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Login / Sign Up{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='sample.css') }}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet">
+
+<div class="container" id="container">
+    <!-- SIGN UP FORM -->
+    <div class="form-container sign-up-container">
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="mode" value="signup">
+            <h1>Create Account</h1>
+            <div class="social-container">
+                <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>
+                <a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+            <span>or use your email for registration</span>
+
+            <input type="text" name="name" placeholder="Name" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="phone" placeholder="Phone Number" required> <!-- Phone Number Field -->
+            <input type="password" name="password1" placeholder="Password" required>
+            <input type="password" name="password2" placeholder="Confirm Password" required>
+
+            <select class="form-control" id="signup-role" name="role" onchange="toggleSignupUserFields()" required>
+                <option value="">-- Select Role --</option>
+                <option value="user">Incharge</option>
+                <option value="staff">Admin</option>
+            </select>
+
+            <!-- Additional Fields for Incharge -->
+            <input type="text" id="signup-batch" name="batch_number" placeholder="Batch Number" style="display: none;">
+            <input type="number" id="signup-age" name="age" placeholder="Age" style="display: none;">
+            <input type="text" id="signup-address" name="address" placeholder="Address" style="display: none;">
+
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="form-container sign-in-container">
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="mode" value="login">
+            <h1>Login</h1>
+            <div class="social-container">
+                <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>
+                <a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+            <span>Use your account</span>
+
+            <select class="form-control" id="login-role" name="role" onchange="toggleFields()" required>
+                <option value="">-- Select Login Type --</option>
+                <option value="user">Incharge</option>
+                <option value="staff">Admin</option>
+            </select>
+
+            <input type="email" id="email" name="email" placeholder="Email" required>
+    
+            <input type="password" id="password" name="password" placeholder="Password" required>
+
+            <!-- Batch Number Field -->
+            <label for="batch_number" id="batch-label" style="display: none;">Batch Number:</label>
+            <input type="text" id="login-batch" name="batch_number" placeholder="Enter Batch Number" style="display: none;">
+
+            <!-- Passkey Field -->
+            <label for="passkey" id="passkey-label" style="display: none;"></label>
+            <input type="password" name="passkey" id="passkey" placeholder="Enter Passkey" style="display: none;">
+
+            <a href="#">Forgot your password?</a>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <!-- OVERLAY -->
+    <div class="overlay-container">
+        <div class="overlay">
+            <div class="overlay-panel overlay-left">
+                <h1>Welcome Back!</h1>
+                <p>To stay connected, please login with your credentials</p>
+                <button class="ghost" id="signIn">Sign In</button>
+            </div>
+            <div class="overlay-panel overlay-right">
+                <h1>Hello!</h1>
+                <p>Enter your details and start your journey with us</p>
+                <button class="ghost" id="signUp">Sign Up</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form Behavior Scripts -->
+<script>
+    function toggleFields() {
+        const role = document.getElementById("login-role").value;
+        const batch = document.getElementById("login-batch");
+        const passkeyLabel = document.getElementById("passkey-label");
+        const passkeyField = document.getElementById("passkey");
+
+        if (role === "user") {
+            batch.style.display = "block";
+            batch.setAttribute("required", "required");
+            passkeyLabel.style.display = "none";
+            passkeyField.style.display = "none";
+        } else if (role === "staff") {
+            batch.style.display = "none";
+            batch.removeAttribute("required");
+            passkeyLabel.style.display = "block";
+            passkeyField.style.display = "block";
+        } else {
+            batch.style.display = "none";
+            batch.removeAttribute("required");
+            passkeyLabel.style.display = "none";
+            passkeyField.style.display = "none";
+        }
+    }
+
+    function toggleSignupUserFields() {
+        const role = document.getElementById("signup-role").value;
+        const userFields = document.getElementById("signup-user-fields");
+        const passkeyField = document.getElementById("signup-passkey");
+
+        if (role === "user") {
+            userFields.style.display = "block";
+            passkeyField.style.display = "none";
+        } else if (role === "staff") {
+            userFields.style.display = "none";
+            passkeyField.style.display = "block";
+        } else {
+            userFields.style.display = "none";
+            passkeyField.style.display = "none";
+        }
+    }
+
+    window.onload = function () {
+        toggleFields();
+        toggleSignupUserFields();
+    };
+</script>
+
+<!-- Sliding Effect Script -->
+<script src="{{ url_for('static', filename='sample.js') }}"></script>
+
+<style>
+    .error-message {
+        color: red;
+        margin: 10px 0;
+        font-weight: bold;
+    }
+    .success-message {
+        color: green;
+        margin: 10px 0;
+        font-weight: bold;
+    }
+</style>
+
+{% endblock %}

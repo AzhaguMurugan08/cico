@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Incharge Dashboard{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+
+<div class="admin-dashboard">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <!-- Profile Section -->
+    <div class="profile">
+      <img src="{{ url_for('static', filename='images/profile.jpeg') }}" alt="Profile Picture" class="profile-pic">
+      <div class="profile-info">
+        <p class="profile-name">{{ current_user.name }}</p>
+      </div>
+    </div>
+
+    <div class="brand">CICO <span class="highlight">Watch</span></div>
+    <ul class="menu">
+      <li><a href="{{ url_for('auth.student_check_in') }}"><i class="fa fa-sign-in"></i> <span>Check In</span></a></li>
+      <li><a href="{{ url_for('auth.student_check_out') }}"><i class="fa fa-sign-out"></i> <span>Check Out</span></a></li>
+      <li><a href="{{ url_for('auth.logout') }}"><i class="fa fa-sign-out-alt"></i> <span>Logout</span></a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Topbar -->
+    <nav class="top-nav">
+      <div class="nav-title">Incharge Dashboard</div>
+  
+    </nav>
+
+    <!-- Stat Cards -->
+    <section class="stats-grid">
+      <div class="card purple">
+        <p>Check-Ins (24h)</p>
+        <h2>{{ checkin_count }}</h2>
+      </div>
+      <div class="card blue">
+        <p>Check-Outs (24h)</p>
+        <h2>{{ checkout_count }}</h2>
+      </div>
+    </section>
+
+    <!-- Activity Log -->
+    <section class="table-section">
+      <h3>Recent Check-Ins</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Roll No</th>
+              <th>Dept</th>
+              <th>year</th>
+              <th>Time</th>
+              
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in checkin_logs %}
+            <tr>
+              <td>{{ log.student_name }}</td>
+              <td>{{ log.roll_number }}</td>
+              <td>{{ log.department }}</td>
+              <td>{{ log.year }}</td> 
+              <td>{{ log.timestamp.strftime('%Y-%m-%d %I:%M:%S %p') }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No check-ins found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="table-section">
+      <h3>Recent Check-Outs</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Roll No</th>
+              <th>Dept</th>
+              <th>year</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in checkout_logs %}
+            <tr>
+              <td>{{ log.student_name }}</td>
+              <td>{{ log.roll_number }}</td>
+              <td>{{ log.department }}</td>
+              <td>{{ log.year }}</td> 
+              <td>{{ log.timestamp.strftime('%Y-%m-%d %I:%M:%S %p') }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5">No check-outs found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  function toggleDropdown() {
+    const dropdown = document.getElementById("dropdown");
+    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+  }
+</script>
+{% endblock %}
